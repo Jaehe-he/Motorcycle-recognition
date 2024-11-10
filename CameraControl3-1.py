@@ -2,10 +2,21 @@
 import cv2
 from ultralytics import YOLO
 import numpy as np
+import gTTS
+import playsound
+#-*- coding: utf-8 -*-
 
 def Helmet_in_FOI(h, t) :
 	print("헬멧 위치 : ", h, "FOI 영역 : ", t)
 	return (False)
+
+def text_speech(text) :
+     text = "헬멧을 착용해주세요."
+     tts = gTTS(text = text, lang='ko')
+     filename = "ko-KR-Neural2-B.wav"
+     playsound.playsound(filename)
+     tts.save(f"{text}.mp3")
+
 
 #model2 = YOLO('C:\\Users\\happy\\runs\\best.pt')
 WIDTH = 640
@@ -15,8 +26,8 @@ def main():  # 메인 함수 정의
     
     print("Check Camera...", end=' ')
     wide_cam = cv2.VideoCapture(0) # 광각 카메라
-    wide_cam.set(cv2.CAP_PROP_FRAME_WIDTH, WIDTH, 640)  # 광각 카메라의 프레임 너비 설정
-    wide_cam.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGHT, 480)  # 광각 카메라의 프레임 높이 설정
+    wide_cam.set(cv2.CAP_PROP_FRAME_WIDTH, WIDTH)  # 광각 카메라의 프레임 너비 설정
+    wide_cam.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGHT)  # 광각 카메라의 프레임 높이 설정
 
     while True:
             print('.', end='')  # 진행 중 점 출력
@@ -55,7 +66,7 @@ def main():  # 메인 함수 정의
                                 r_npp = r_npp * np.array([640, 480, 640, 480])
 						                                 
                                 if r_id in [1, 2]: #헬멧
-                                    if Helmet_in_FOI(r_npp.astype(int), foi.astype(int)) == True :
+                                    if Helmet_in_FOI(r_npp.astype(int), driver_foi.astype(int)) == True :
                                         helmet_found = True
                                         break
 		
@@ -68,13 +79,14 @@ def main():  # 메인 함수 정의
                                 # 헬멧을 찾지 못했으면 (helmet_found가 False일 경우)
                         if not (helmet_found):
                                 
-                            foi = foi.astype(int)
+                            driver_foi = driver_foi.astype(int)
                                         
-                            face = frame[foi[0][1]0 : foi[0][3], foi[0][0], foi[0][2]]
+                            face = frame[driver_foi[0][1] : driver_foi[0][3], driver_foi[0][0] : driver_foi[0][2]]
                             # 상반신 부분을 2배 확대하여 표시 
-                            face = cv2.resize(face, dsize=(0,0), fx=2.0, fy=2.0, interpolation=cv2.INTER_LINEAR)
-                        cv2.imshow('Face', face)
-                        c = cv2.waitKey(1)  # 키 입력을 1ms 기다림
+                            face = cv2.resize(face, dsize=(0,0), fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+                            print(text_speech)
+                            cv2.imshow('Face', face)
+                            c = cv2.waitKey(1)  # 키 입력을 1ms 기다림
                                         
                              
     cv2.destroyAllWindows()
