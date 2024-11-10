@@ -1,4 +1,4 @@
-#최종 수정본
+# 변경된 부분 (깃 테스트 중)
 import cv2
 from ultralytics import YOLO
 import numpy as np
