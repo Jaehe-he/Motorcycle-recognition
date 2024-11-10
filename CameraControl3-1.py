@@ -25,9 +25,9 @@ def main():  # 메인 함수 정의
 
                 
             if ret:
-			    cv2.imshow("Captured", frame)
-				if (cv2.waitKey(10) == 27) :
-				    break
+                cv2.imshow("Captured", frame)
+                if (cv2.waitKey(10) == 27) :
+                    break
 
             image = np.asarray(frame)
             found = model1.predict(image, show=True, conf=0.7, verbose=False) 
@@ -43,21 +43,21 @@ def main():  # 메인 함수 정의
                         if id == 0: # 드라이버
                             driver_foi = npp
                             
-                            driver_fol[0][3] = npp[0][1] + int((npp[0][3] - npp[0][1]/2)
+                            driver_foi[0][3] = npp[0][1] + int(npp[0][3] - npp[0][1]/2)
                             
 
 
                         # for r in found:
-	                        helmet_found = False
-	                        for r in result.boxes:
-					                        r_id = r.cls.cpu().numpy())
-						                      r_npp = r.xyxyn.cpu().numpy()
-						                      r_npp = r_npp * np.array([640, 480, 640, 480])
+                            helmet_found = False
+                            for r in result.boxes:
+                                r_id = r.cls.cpu().numpy()
+                                r_npp = r.xyxyn.cpu().numpy()
+                                r_npp = r_npp * np.array([640, 480, 640, 480])
 						                                 
-				                          if r_id in [1, 2]: #헬멧
-							                          if Helmet_in_FOI(r_npp.astype(int), foi.astype(int)) == True :
-											                          helmet_found = True
-											                          break
+                                if r_id in [1, 2]: #헬멧
+                                    if Helmet_in_FOI(r_npp.astype(int), foi.astype(int)) == True :
+                                        helmet_found = True
+                                        break
 		
 	
                                 # if driver_foi is not None:
@@ -66,7 +66,7 @@ def main():  # 메인 함수 정의
                                     
                             
                                 # 헬멧을 찾지 못했으면 (helmet_found가 False일 경우)
-                    if not (helmet_found):
+                        if not (helmet_found):
                                 
                             foi = foi.astype(int)
                                         
@@ -78,7 +78,7 @@ def main():  # 메인 함수 정의
                                         
                              
     cv2.destroyAllWindows()
-    cap.release()
+    wide_cam.release()
        
           
 if __name__ == "__main__" :
