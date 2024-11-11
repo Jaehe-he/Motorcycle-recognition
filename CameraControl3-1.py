@@ -3,19 +3,25 @@ import cv2
 from ultralytics import YOLO
 import numpy as np
 from gtts import gTTS
-from playsound import playsound
+import playsound
+import pygame
+
 #-*- coding: utf-8 -*-
 
 def Helmet_in_FOI(h, t) :
 	print("헬멧 위치 : ", h, "FOI 영역 : ", t)
 	return (False)
 
-def text_speech(text) :
-     text = "헬멧을 착용해주세요."
-     tts = gTTS(text = text, lang='ko')
-     filename = "ko-KR-Neural2-B.wav"
-     playsound(filename)
-     tts.save(f"{text}.mp3")
+# def text_speech(text) :
+#      text = "헬멧을 착용해주세요."
+#      tts = gTTS(text = text, lang='ko', = 'utf-8')
+#      filename = "ko-KR-Neural2-B.mp4"
+#      tts.save(f"{text}.mp3")
+#      playsound.playsound(filename)
+def text_speech(text):
+    text = "헬멧을 착용해주세요."
+    tts = gTTS(text = text, lang="ko")
+    tts.save(f"{text}.mp3")
 
 
 #model2 = YOLO('C:\\Users\\happy\\runs\\best.pt')
@@ -84,7 +90,7 @@ def main():  # 메인 함수 정의
                             face = frame[driver_foi[0][1] : driver_foi[0][3], driver_foi[0][0] : driver_foi[0][2]]
                             # 상반신 부분을 2배 확대하여 표시 
                             face = cv2.resize(face, dsize=(0,0), fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
-                            text_speech("헬멧을 착용해주세요.mp3")
+                            text_speech("헬멧을 착용해주세요")
                             cv2.imshow('Face', face)
                             c = cv2.waitKey(1)  # 키 입력을 1ms 기다림
                                         
