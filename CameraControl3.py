@@ -9,22 +9,21 @@ import playsound
 
 def Helmet_in_FOI(h, t) :
 	print("헬멧 위치 : ", h, "FOI 영역 : ", t)
-	return (False)
+	return np.all(h >= t[:2]) and np.all(h <= t[2:])
 
 # TTS 음성 출력========================
 def text_speech(text) :
-     text = "헬멧을 착용해주세요."
      tts = gTTS(text = text, lang='ko')
-     filename = "ko-KR-Neural2-B.wav"
-     playsound.playsound(filename)
-     tts.save(f"{text}.mp3")
+     filename = f"{text}.mp3"
+     tts.save(filename)
+     playsound(filename)
+# =====================================
 
-
-#model2 = YOLO('C:\\Users\\happy\\runs\\best.pt')
+model_path = 'C:\\Users\\happy\\runs\\best.pt'
 WIDTH = 640
 HEIGHT = 480
 
-def main():  # 메인 함수 정의
+def main():
     
     print("Check Camera...", end=' ')
     wide_cam = cv2.VideoCapture(0) # 광각 카메라
@@ -50,39 +49,29 @@ def main():  # 메인 함수 정의
 	           # (H1, H2, R1, R2, H3) : R2-H2, H1과 H3는 무관한 헬멧 
                 for box in result.boxes:
                         id = box.cls.cpu().numpy()
-                        npp = box.xyxyn.cpu().numpy() #Bounding box 좌표  # 좌표 변환
-                        npp = npp * np.array([640, 480, 640, 480])
+                        npp = box.xyxyn.cpu().numpy() * np.array([WIDTH, HEIGHT, WIDTH, HEIGHT])
                         
                         if id == 0: # 드라이버
                             driver_foi = npp
-                            
                             driver_foi[0][3] = npp[0][1] + int(npp[0][3] - npp[0][1]/2)
-                            
+                            driver_foi = driver_foi.astype(int)
 
 
-                        # for r in found:
-                            helmet_found = False
-                            for r in result.boxes:
-                                r_id = r.cls.cpu().numpy()
-                                r_npp = r.xyxyn.cpu().numpy()
-                                r_npp = r_npp * np.array([640, 480, 640, 480])
-						                                 
-                                if r_id in [1, 2]: #헬멧
-                                    if Helmet_in_FOI(r_npp.astype(int), driver_foi.astype(int)) == True :
-                                        helmet_found = True
-                                        break
-		
-	
-                                # if driver_foi is not None:
-                                # 헬멧이 드라이버의 바운딩 박스 안에 있는지를 확인
+                if driver_foi is not None:
+                    for r in result.boxes:
+                        r_id = r.cls.cpu().numpy()
+                        r_npp = r.xyxyn.cpu().numpy() * np.array([WIDTH, HEIGHT, WIDTH, HEIGHT])
+                        r_npp = r_npp.astype(int)
+                        
+                        if r_id in [1, 2]:  # 헬멧
+                            if Helmet_in_FOI(r_npp, driver_foi):
+                                helmet_found = True
+                                break        
                                 
                                     
                             
-                                # 헬멧을 찾지 못했으면 (helmet_found가 False일 경우)
-                        if not (helmet_found):
-                                
-                            driver_foi = driver_foi.astype(int)
-                                        
+                        # 헬멧을 찾지 못했으면 (helmet_found가 False일 경우)
+                        if not (helmet_found):                                        
                             face = frame[driver_foi[0][1] : driver_foi[0][3], driver_foi[0][0] : driver_foi[0][2]]
                             # 상반신 부분을 2배 확대하여 표시 
                             face = cv2.resize(face, dsize=(0,0), fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
@@ -98,10 +87,8 @@ def main():  # 메인 함수 정의
        
           
 if __name__ == "__main__" :
-
-# 학습한 model 읽어 들임.
+    # 학습한 model 읽어 들임.
     print("motorcycle Detector model is loading...")    
     model1 = YOLO('C:\\Users\\happy\\runs\\best.pt')
 
-# main() 함수 호출 --> 프로그램 시작점   
     main()
