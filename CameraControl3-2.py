@@ -58,7 +58,7 @@ def main():
 	           # (H1, H2, R1, R2, H3) : R2-H2, H1과 H3는 무관한 헬멧 
                 for box in result.boxes:
                         id = box.cls.cpu().numpy()
-                        npp = box.xyxyn.cpu().numpy() * np.array([WIDTH/2, HEIGHT/2, WIDTH/2, HEIGHT/2])
+                        npp = box.xyxyn.cpu().numpy() * np.array([WIDTH, HEIGHT, WIDTH, HEIGHT])
                         
                         if id == 0: # 드라이버
                             driver_foi = npp
@@ -91,7 +91,17 @@ def main():
                             # f.read()
                             text_speech("헬멧을 착용해주세요..mp3")
                             cv2.imshow('Face', face)
-                            c = cv2.waitKey(1)  # 키 입력을 1ms 기다림
+                            c = cv2.waitKey(1)
+                            if (c == 27):  # ESC 키가 눌리면 루프 종료
+                                break
+                            elif (c != ord('s') and c != ord('S')):  # 's'나 'S' 키가 아니면 계속 루프 진행
+                                continue  # 키 입력을 1ms 기다림
+
+                            print("===>", time.time())  # 현재 시간을 출력
+
+    # 프레임을 JPEG 형식으로 인코딩 (품질은 90으로 설정)
+                            retval, frame = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
+                            print(retval)  # 인코딩 성공 여부 출력
                                         
                              
     cv2.destroyAllWindows()
