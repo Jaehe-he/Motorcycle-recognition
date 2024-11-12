@@ -66,17 +66,17 @@ def main():
                             driver_foi = driver_foi.astype(int)
 
 
-                if driver_foi is not None:
-                    helmet_found = False
-                    for r in result.boxes:
-                        r_id = r.cls.cpu().numpy()
-                        r_npp = r.xyxyn.cpu().numpy() * np.array([WIDTH, HEIGHT, WIDTH, HEIGHT])
-                        r_npp = r_npp.astype(int)
-                        
-                        if r_id in [1, 2]:  # 헬멧
-                            if Helmet_in_FOI(r_npp, driver_foi):
-                                helmet_found = True
-                                break        
+                            if driver_foi is not None:
+                                helmet_found = False
+                                for r in result.boxes:
+                                    r_id = r.cls.cpu().numpy()
+                                    r_npp = r.xyxyn.cpu().numpy() * np.array([WIDTH, HEIGHT, WIDTH, HEIGHT])
+                                    r_npp = r_npp.astype(int)
+                                    
+                                    if r_id in [1, 2]:  # 헬멧
+                                        if Helmet_in_FOI(r_npp, driver_foi):
+                                            helmet_found = True
+                                            break        
                                 
                                     
                             
