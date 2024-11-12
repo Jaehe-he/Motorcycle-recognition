@@ -8,8 +8,17 @@ import pygame
 #-*- coding: utf-8 -*-
 
 def Helmet_in_FOI(h, t) :
-	print("헬멧 위치 : ", h, "FOI 영역 : ", t)
-	return np.all(h >= t[:2]) and np.all(h <= t[2:])
+    print("헬멧 위치 : ", h, "FOI 영역 : ", t) 
+
+    #print("Result  : ",np.all(h >= t[:2]) and np.all(h <= t[2:]) )
+    # h = [xyxy] t [xyxy]
+    h_x = int((h[0] + h[2])/2)
+    h_y = int((h[1] + h[3])/2)
+    print("helmet center : ", h_x, h_y) 
+    if (h_x > t[0] and h_x < t[2] and h_y > t[1] and h_y < t[3]) : return True
+    else : return False
+
+    #return np.all(h >= t[:2]) and np.all(h <= t[2:])
 
 # TTS 음성 출력========================
 def text_speech(text):
@@ -39,8 +48,13 @@ def main():
     wide_cam.set(cv2.CAP_PROP_FRAME_WIDTH, WIDTH)  # 광각 카메라의 프레임 너비 설정
     wide_cam.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGHT)  # 광각 카메라의 프레임 높이 설정
 
+    msgbox = np.array([100,200,100,200])
+    cv2.imshow("메시지 영역", msgbox)
+    cv2.waitKey(1)
+    
     while True:
             print('.', end='')  # 진행 중 점 출력
+            input("Wait...")
             ret, frame = wide_cam.read()
             ret, frame = wide_cam.read()
 
@@ -51,37 +65,38 @@ def main():
                     break
 
             image = np.asarray(frame)
-            found = model1.predict(image, show=True, conf=0.7, verbose=False) 
+            found = model1.predict(image, show=True, conf=0.5, verbose=False) 
             
 
             for result in found:# 라이더 여러명, 헬멧 여러개인 것을 확인
 	           # (H1, H2, R1, R2, H3) : R2-H2, H1과 H3는 무관한 헬멧 
                 for box in result.boxes:
-                        id = box.cls.cpu().numpy()
+                        id = int(box.cls.cpu().numpy()[0])
                         npp = box.xyxyn.cpu().numpy() * np.array([WIDTH, HEIGHT, WIDTH, HEIGHT])
                         
                         if id == 0: # 드라이버
                             driver_foi = npp
-                            driver_foi[0][3] = npp[0][1] + int(npp[0][3] - npp[0][1]/2)
+                            driver_foi[0][3] = npp[0][1] + int((npp[0][3] - npp[0][1])/2)
                             driver_foi = driver_foi.astype(int)
-
+                            print ("FOI : ", driver_foi)
 
                             if driver_foi is not None:
                                 helmet_found = False
                                 for r in result.boxes:
-                                    r_id = r.cls.cpu().numpy()
+                                    r_id = int(r.cls.cpu().numpy()[0])
                                     r_npp = r.xyxyn.cpu().numpy() * np.array([WIDTH, HEIGHT, WIDTH, HEIGHT])
                                     r_npp = r_npp.astype(int)
-                                    
+                                    print ("Check helmet : ", r_id)
                                     if r_id in [1, 2]:  # 헬멧
-                                        if Helmet_in_FOI(r_npp, driver_foi):
+                                        if Helmet_in_FOI(r_npp[0], driver_foi[0]):
                                             helmet_found = True
                                             break        
                                 
                                     
                             
                         # 헬멧을 찾지 못했으면 (helmet_found가 False일 경우)
-                        if not (helmet_found):                                        
+                        if not (helmet_found):
+                            print (driver_foi)                                        
                             face = frame[driver_foi[0][1] : driver_foi[0][3], driver_foi[0][0] : driver_foi[0][2]]
                             # 상반신 부분을 2배 확대하여 표시 
                             face = cv2.resize(face, dsize=(0,0), fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
@@ -99,7 +114,7 @@ def main():
 
                             print("===>", time.time())  # 현재 시간을 출력
 
-    # 프레임을 JPEG 형식으로 인코딩 (품질은 90으로 설정)
+                            # 프레임을 JPEG 형식으로 인코딩 (품질은 90으로 설정)
                             retval, frame = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
                             print(retval)  # 인코딩 성공 여부 출력
                                         
