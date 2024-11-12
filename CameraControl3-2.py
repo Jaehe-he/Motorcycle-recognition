@@ -5,7 +5,15 @@ import numpy as np
 
 from gtts import gTTS
 import pygame
-#-*- coding: utf-8 -*-
+from PIL import ImageFont, ImageDraw, Image
+
+def myPutText(src, text, pos, font_size, font_color) :
+    img_pil = Image.fromarray(src)
+    draw = ImageDraw.Draw(img_pil)
+    font = ImageFont.truetype('fonts/gulim.ttc', font_size)
+    draw.text(pos, text, font=font, fill= font_color)
+    return np.array(img_pil)
+
 
 def Helmet_in_FOI(h, t) :
     print("헬멧 위치 : ", h, "FOI 영역 : ", t) 
@@ -95,13 +103,20 @@ def main():
                                 print (driver_foi)                                        
                                 face = frame[driver_foi[0][1] : driver_foi[0][3], driver_foi[0][0] : driver_foi[0][2]]
                                     # 상반신 부분을 2배 확대하여 표시 
-                                face = cv2.resize(face, dsize=(0,0), fx=0.5, fy=0.5, interpolation=cv2.INTER_LINEAR)
+                                face = cv2.resize(face, dsize=(0,0), fx=3.0, fy=3.0, interpolation=cv2.INTER_LINEAR)
 
                                     # TTS 음성 출력 위치======================
                                     # f = open("헬멧을 착용해주세요..mp3", "r", encoding = 'utf-8')
                                     # f.read()
-                                text_speech("헬멧을 착용해주세요..mp3")
-                                cv2.imshow('Face', face)
+                                #dashboard = np.full ((face.shape[0] + 100, face.shape[1] + 1000, 3), (50, 50, 50), np.uint8)
+                                dashboard = np.full ((face.shape[0] + 2800, face.shape[1] + 800, 3), (50,50,50), np.uint8)
+                                dashboard[10:face.shape[0]+10, 10:face.shape[1]+10, :] = face
+
+                                dashboard = myPutText(dashboard, '헬멧을\n착용해주세요 !', (30 + face.shape[1],30), 100, (255,255,255))
+
+                                text_speech("헬멧을 착용해주세요..mp3")        
+                                cv2.imshow("Driver wo Helmet", dashboard)
+                                # cv2.imshow('Face', face)
                                 c = cv2.waitKey(1)
                                 if (c == 27):  # ESC 키가 눌리면 루프 종료
                                     break
@@ -113,6 +128,24 @@ def main():
                                     # 프레임을 JPEG 형식으로 인코딩 (품질은 90으로 설정)
                                 retval, frame = cv2.imencode('.jpg', frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
                                 print(retval)  # 인코딩 성공 여부 출력
+                            # if not(helmet_found) :
+                            #             # FOI 영역을 추출해서 화면에 출력 : frame 이미지에서 foi로 지정된 부분만 추출해서 face에 옮김.
+                            #             driver_foi = driver_foi.astype(int)
+                 
+                            #             # 상반신 crop : y1:y2, x1:x2
+                            #             face = frame[foi[0][1] : foi[0][3], foi[0][0]: foi[0][2]]
+                                        
+                            #             # 상반신 부분을 2배 확대하여 표시
+                            #             face = cv2.resize(face, dsize=(0,0), fx=2.0, fy=2.0, interpolation=cv2.INTER_LINEAR)
+
+                            #             dashboard = np.full ((face.shape[0] + 20, face.shape[1] + 400, 3), (0,255,0), np.uint8)
+                            #             dashboard[10:face.shape[0]+10, 10:face.shape[1]+10, :] = face
+
+                            #             dashboard = myPutText(dashboard, '헬멧을 착용하세요 !', (30 + face.shape[1],30), 32, (0,0,0))
+                                        
+                            #             cv2.imshow("Driver wo Helmet", dashboard)
+                                        
+                            #             cv2.waitKey(1)
                                         
                              
     cv2.destroyAllWindows()
